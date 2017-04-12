@@ -76,6 +76,15 @@
             jsonWriter.WriteEndObject();
             
             GC.KeepAlive(fileSessions);
+
+            for (int i = 0; i < count; ++i)
+            {
+                unsafe
+                {
+                    Etw.CloseTrace(handles[i]);
+                }
+            }
+
             return true;
         }
 
