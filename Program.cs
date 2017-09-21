@@ -79,10 +79,7 @@
 
             for (int i = 0; i < count; ++i)
             {
-                unsafe
-                {
-                    Etw.CloseTrace(handles[i]);
-                }
+                Etw.CloseTrace(handles[i]);
             }
 
             return true;

@@ -12,7 +12,7 @@ ETW2JSON is a tool that converts ETW Log Files (.ETL) to JSON using the Newtonso
 
 ## Nuget package
 
-This library is available on Nuget -- https://www.nuget.org/packages/ETW2JSON/1.2.0
+This library is available on Nuget -- https://www.nuget.org/packages/ETW2JSON/1.3.3
 
 ## Why JSON?
 
@@ -35,7 +35,7 @@ You can now view this data in a variety of JSON log viewers, merge it with your 
 
 ## Does it understand Kernel, .NET EventSource, XPERF, etc. events?
 
-ETW2JSON is built upon [ETWDeserializer](http://github.com/ETWTools/ETWDeserializer), a library that understands Windows MOF Classes events, Windows Vista Manifest events and EventSource .NET events. It also understands events that XPERF (WPR) adds as part of its merging process (to give PDB information) for profiler tools like the Windows Performance Recorder.
+ETW2JSON is a library that understands Windows MOF Classes events, Windows Vista Manifest events and EventSource .NET events. It also understands events that XPERF (WPR) adds as part of its merging process (to give PDB information) for profiler tools like the Windows Performance Recorder.
 
 ## Example output
 
