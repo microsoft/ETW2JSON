@@ -367,7 +367,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe string ReadCountedString()
         {
-            ushort length = *(ushort*)this.eventRecord->UserData;
+            ushort length = this.ReadUInt16();
             return this.ReadUnicodeStringHelper(length);
         }
 
@@ -377,7 +377,7 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe string ReadCountedAnsiString()
         {
-            ushort length = *(ushort*)this.eventRecord->UserData;
+            ushort length = this.ReadUInt16();
             return this.ReadAnsiStringHelper(length);
         }
 
@@ -387,8 +387,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe string ReadReversedCountedString()
         {
-            byte low = (byte)((ushort)this.eventRecord->UserData & 0xFF);
-            byte high = (byte)((ushort)this.eventRecord->UserData >> 8);
+            byte low = this.ReadUInt8();
+            byte high = this.ReadUInt8();
             ushort length = (ushort)(((uint)low & 0xFF) | ((uint)high & 0xFF) << 8);
 
             return this.ReadUnicodeStringHelper(length);
@@ -400,8 +400,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe string ReadReversedCountedAnsiString()
         {
-            byte low = (byte)((ushort)this.eventRecord->UserData & 0xFF);
-            byte high = (byte)((ushort)this.eventRecord->UserData >> 8);
+            byte low = this.ReadUInt8();
+            byte high = this.ReadUInt8();
             ushort length = (ushort)(((uint)low & 0xFF) | ((uint)high & 0xFF) << 8);
 
             return this.ReadAnsiStringHelper(length);
