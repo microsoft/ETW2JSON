@@ -132,7 +132,9 @@
                 string task = this.BuildName("EventID", this.traceEventInfo->Id.ToString(), this.traceEventInfo->TaskNameOffset);
                 string opcode = this.BuildName("Opcode", this.traceEventInfo->Opcode.ToString(), this.traceEventInfo->OpcodeNameOffset);
 
-                var topLevelOperands = this.IterateProperties(buffer, 0, (int)traceEventInfo->TopLevelPropertyCount, eventPropertyInfoArr);
+                //WPP properties not supported
+                int end = this.traceEventInfo->DecodingSource == DECODING_SOURCE.DecodingSourceWPP ? 0 : (int)traceEventInfo->TopLevelPropertyCount;
+                var topLevelOperands = this.IterateProperties(buffer, 0, end, eventPropertyInfoArr);
                 return new EventTraceOperand(new EventMetadata(this.traceEventInfo->ProviderGuid, this.traceEventInfo->Id, this.traceEventInfo->Version, provider + "/" + task + "/" + opcode, this.flatPropertyList.Select(t => t.Metadata).ToArray()), eventMetadataTableIndex, topLevelOperands);
             }
 
