@@ -39,6 +39,9 @@
             this.writer.WritePropertyName("ThreadId");
             this.writer.WriteValue(runtimeMetadata.ThreadId);
 
+            this.writer.WritePropertyName("ProcessorNumber");
+            this.writer.WriteValue(runtimeMetadata.ProcessorNumber);
+
             var activityId = runtimeMetadata.ActivityId;
             if (activityId != Guid.Empty)
             {
