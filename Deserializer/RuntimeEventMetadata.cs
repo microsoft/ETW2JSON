@@ -119,6 +119,17 @@
             }
         }
 
+        public ushort ProcessorNumber
+        {
+            get
+            {
+                unsafe
+                {
+                    return this.eventRecord->ProcessorNumber;
+                }
+            }
+        }
+
         // logic from: https://msdn.microsoft.com/en-us/library/windows/desktop/dd392308(v=vs.85).aspx
         public ulong[] GetStacks(out ulong matchId)
         {
