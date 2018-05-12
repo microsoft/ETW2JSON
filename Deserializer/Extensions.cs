@@ -63,7 +63,7 @@
                     return TDH_IN_TYPE.TDH_INTYPE_SYSTEMTIME;
                 case "sid":
                     return TDH_IN_TYPE.TDH_INTYPE_SID;
-                case "hextint32":
+                case "hexint32":
                     return TDH_IN_TYPE.TDH_INTYPE_HEXINT32;
                 case "hexint64":
                     return TDH_IN_TYPE.TDH_INTYPE_HEXINT64;
