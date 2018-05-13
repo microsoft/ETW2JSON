@@ -12,7 +12,7 @@ ETW2JSON is a tool that converts ETW Log Files (.ETL) to JSON using the Newtonso
 
 ## Nuget package
 
-This library is available on Nuget -- https://www.nuget.org/packages/ETW2JSON/1.3.3
+This library is available on Nuget -- https://www.nuget.org/packages/ETW2JSON/1.3.7
 
 ## Why JSON?
 
