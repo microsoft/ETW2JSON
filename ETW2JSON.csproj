@@ -1,72 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <ProjectGuid>{82423166-99F9-48FE-8453-0E7DDB1D6192}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ETW2JSON</RootNamespace>
-    <AssemblyName>ETW2JSON</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFramework>net45</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Deserializer\CustomParsers\CustomParserGuids.cs" />
-    <Compile Include="Deserializer\CustomParsers\KernelStackWalkEventParser.cs" />
-    <Compile Include="Deserializer\CustomParsers\KernelTraceControlDbgIdParser.cs" />
-    <Compile Include="Deserializer\CustomParsers\KernelTraceControlImageIdFileVersionParser.cs" />
-    <Compile Include="Deserializer\CustomParsers\KernelTraceControlImageIdParser.cs" />
-    <Compile Include="Deserializer\Deserializer.cs" />
-    <Compile Include="Deserializer\Etw.cs" />
-    <Compile Include="Deserializer\EventMan.cs" />
-    <Compile Include="Deserializer\EventMetadata.cs" />
-    <Compile Include="Deserializer\EventRecordReader.cs" />
-    <Compile Include="Deserializer\EventSourceManifest.cs" />
-    <Compile Include="Deserializer\EventTraceOperand.cs" />
-    <Compile Include="Deserializer\EventTraceOperandBuilder.cs" />
-    <Compile Include="Deserializer\EventTraceOperandExpressionBuilder.cs" />
-    <Compile Include="Deserializer\EventTracePropertyOperand.cs" />
-    <Compile Include="Deserializer\Extensions.cs" />
-    <Compile Include="Deserializer\GlobalSuppressions.cs" />
-    <Compile Include="Deserializer\IEtwWriter.cs" />
-    <Compile Include="Deserializer\IEventTraceOperand.cs" />
-    <Compile Include="Deserializer\IEventTracePropertyOperand.cs" />
-    <Compile Include="Deserializer\MapInformation.cs" />
-    <Compile Include="Deserializer\PropertyMetadata.cs" />
-    <Compile Include="Deserializer\RuntimeEventMetadata.cs" />
-    <Compile Include="Deserializer\Tdh.cs" />
-    <Compile Include="Deserializer\TraceEventKey.cs" />
-    <Compile Include="Etw.cs" />
-    <Compile Include="EtwJsonWriter.cs" />
-    <Compile Include="Program.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="LICENSE" />
-    <None Include="packages.config" />
-    <None Include="README.md" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <Import Project="SourceLink.targets" />
+
 </Project>
