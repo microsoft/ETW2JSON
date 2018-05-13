@@ -29,11 +29,16 @@
 
         private readonly List<EventMetadata> eventMetadataTableList = new List<EventMetadata>();
 
-        private readonly T writer;
+        private T writer;
 
         private EventMetadata[] eventMetadataTable;
 
         public Deserializer(T writer)
+        {
+            this.writer = writer;
+        }
+
+        public void ResetWriter(T writer)
         {
             this.writer = writer;
         }
