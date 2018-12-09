@@ -259,7 +259,19 @@
         [DllImport("tdh.dll", EntryPoint = "TdhGetEventInformation")]
         internal static extern unsafe int GetEventInformation(EVENT_RECORD* pEvent, uint TdhContextCount, IntPtr pTdhContext, byte* pBuffer, out uint pBufferSize);
 
+        [DllImport("tdh.dll", EntryPoint = "TdhLoadManifest")]
+        internal static extern int LoadManifest([MarshalAs(UnmanagedType.LPWStr)] string manifestPath);
+
+        [DllImport("tdh.dll", EntryPoint = "TdhUnloadManifest")]
+        internal static extern int UnloadManifest([MarshalAs(UnmanagedType.LPWStr)] string manifestPath);
+
         [DllImport("tdh.dll", EntryPoint = "TdhGetEventMapInformation", CharSet = CharSet.Unicode)]
         internal static extern unsafe int GetEventMapInformation(EVENT_RECORD* pEvent, string pMapName, byte* pBuffer, out uint pBufferSize);
+
+        [DllImport("tdh.dll", EntryPoint = "TdhEnumerateManifestProviderEvents", CharSet = CharSet.Unicode)]
+        internal static extern int EnumerateManifestProviderEvents(ref GUID providerGuid, IntPtr buffer, out int bufferSize);
+
+        [DllImport("tdh.dll", EntryPoint = "TdhGetManifestEventInformation", CharSet = CharSet.Unicode)]
+        internal static extern unsafe int GetManifestEventInformation(ref GUID providerGuid, EVENT_DESCRIPTOR* eventDescriptor, IntPtr buffer, out int bufferSize);
     }
 }

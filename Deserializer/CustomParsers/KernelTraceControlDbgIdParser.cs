@@ -31,10 +31,10 @@
                 new[] { ImageBase, ProcessId, GuidSig, Age, PdbFileName });
         }
 
-        public void Parse<T>(EventRecordReader reader, T writer, EventMetadata[] metadataArray, RuntimeEventMetadata runtimeMetadata)
+        public void Parse<T>(EventRecordReader reader, T writer, string eventName, PropertyMetadata[] propertyMetadataArray)
             where T : IEtwWriter
         {
-            writer.WriteEventBegin(EventMetadata, runtimeMetadata);
+            writer.WriteEventBegin(EventMetadata.Name, reader);
 
             writer.WritePropertyBegin(ImageBase);
             writer.WriteUInt64(reader.ReadUInt64());

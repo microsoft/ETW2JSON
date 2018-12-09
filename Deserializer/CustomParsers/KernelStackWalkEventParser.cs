@@ -28,13 +28,13 @@
                 new[] { EventTimeStampMetadata, StackProcessMetadata, StackThreadMetadata, StacksPropertyMetadata });
         }
 
-        public void Parse<T>(EventRecordReader reader, T writer, EventMetadata[] metadataArray, RuntimeEventMetadata runtimeMetadata)
+        public void Parse<T>(EventRecordReader reader, T writer, string eventName, PropertyMetadata[] propertyMetadataArray)
             where T : IEtwWriter
         {
-            writer.WriteEventBegin(EventMetadata, runtimeMetadata);
+            writer.WriteEventBegin(EventMetadata.Name, reader);
 
-            int pointerSize = (runtimeMetadata.Flags & Etw.EVENT_HEADER_FLAG_32_BIT_HEADER) != 0 ? 4 : 8;
-            int numberOfStacks = (runtimeMetadata.UserDataLength - 16) / pointerSize;
+            int pointerSize = (reader.Flags & Etw.EVENT_HEADER_FLAG_32_BIT_HEADER) != 0 ? 4 : 8;
+            int numberOfStacks = (reader.UserDataLength - 16) / pointerSize;
 
             writer.WritePropertyBegin(EventTimeStampMetadata);
             writer.WriteUInt64(reader.ReadUInt64());

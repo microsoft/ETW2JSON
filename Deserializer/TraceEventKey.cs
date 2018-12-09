@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal struct TraceEventKey : IEquatable<TraceEventKey>
+    public struct TraceEventKey : IEquatable<TraceEventKey>
     {
         private readonly Guid providerId;
 

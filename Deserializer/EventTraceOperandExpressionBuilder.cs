@@ -12,10 +12,19 @@
             IEventTraceOperand operand,
             ParameterExpression eventRecordReader,
             ParameterExpression eventRecordWriter,
-            ParameterExpression eventMetadataTable,
-            ParameterExpression runtimeMetadata)
+            ParameterExpression eventName,
+            ParameterExpression properties)
         {
-            return new EventTraceOperandExpressionBuilderImpl().Build(operand, eventRecordReader, eventRecordWriter, eventMetadataTable, runtimeMetadata);
+            var expGenerator = new ExpressionGenerator(eventRecordReader, eventRecordWriter, properties);
+            var list = new List<Expression>
+            {
+                eventRecordWriter.Call("WriteEventBegin", eventName, eventRecordReader),
+                expGenerator.CodeGenerate(operand.EventPropertyOperands),
+                eventRecordWriter.Call("WriteEventEnd")
+            };
+
+            var returnExpression = Expression.Block(list);
+            return returnExpression;
         }
 
         public static MethodCallExpression Call(this ParameterExpression instance, string methodName, params Expression[] arguments)
@@ -23,34 +32,6 @@
             Type[] parameterTypes = arguments.Select(t => t.Type).ToArray();
             var methodInfo = instance.Type.GetMethod(methodName, parameterTypes);
             return Expression.Call(instance, methodInfo, arguments);
-        }
-    }
-
-    internal sealed class EventTraceOperandExpressionBuilderImpl
-    {
-        public Expression Build(IEventTraceOperand operand, ParameterExpression eventRecordReader, ParameterExpression eventRecordWriter, ParameterExpression eventMetadataTable, ParameterExpression runtimeMetadata)
-        {
-            var eventMetadata = Expression.Parameter(typeof(EventMetadata));
-            var properties = Expression.Parameter(typeof(PropertyMetadata[]));
-
-            var variables = new List<ParameterExpression>
-            {
-                eventMetadata,
-                properties
-            };
-
-            var expGenerator = new ExpressionGenerator(eventRecordReader, eventRecordWriter, properties);
-            var list = new List<Expression>
-            {
-                Expression.Assign(eventMetadata, Expression.ArrayAccess(eventMetadataTable, Expression.Constant(operand.EventMetadataTableIndex))),
-                Expression.Assign(properties, Expression.PropertyOrField(eventMetadata, "Properties")),
-                eventRecordWriter.Call("WriteEventBegin", eventMetadata, runtimeMetadata),
-                expGenerator.CodeGenerate(operand.EventPropertyOperands),
-                eventRecordWriter.Call("WriteEventEnd")
-            };
-
-            var returnExpression = Expression.Block(variables, list);
-            return returnExpression;
         }
 
         private sealed class ExpressionGenerator

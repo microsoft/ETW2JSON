@@ -52,10 +52,10 @@
                 new[] { ImageSize, TimeDateStamp, OrigFileName, FileDescription, FileVersion, BinFileVersion, VerLanguage, ProductName, CompanyName, ProductVersion, FileId, ProgramId });
         }
 
-        public void Parse<T>(EventRecordReader reader, T writer, EventMetadata[] metadataArray, RuntimeEventMetadata runtimeMetadata)
+        public void Parse<T>(EventRecordReader reader, T writer, string eventName, PropertyMetadata[] propertyMetadataArray)
             where T : IEtwWriter
         {
-            writer.WriteEventBegin(EventMetadata, runtimeMetadata);
+            writer.WriteEventBegin(EventMetadata.Name, reader);
 
             writer.WritePropertyBegin(ImageSize);
             writer.WriteUInt64(reader.ReadUInt32());

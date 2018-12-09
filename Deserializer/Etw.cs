@@ -11,6 +11,26 @@
     using UCHAR = System.Byte;
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct PROVIDER_EVENT_INFO
+    {
+        public ULONG NumberOfEvents;
+        public ULONG Reserved;
+        public System.IntPtr EventDescriptorsArray;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct EVENT_DESCRIPTOR
+    {
+        public USHORT Id;
+        public UCHAR Version;
+        public UCHAR Channel;
+        public UCHAR Level;
+        public UCHAR Opcode;
+        public USHORT Task;
+        public ULONGLONG Keyword;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct EVENT_RECORD
     {
         public USHORT Size; // Event Size

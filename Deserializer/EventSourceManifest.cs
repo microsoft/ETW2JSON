@@ -2,14 +2,18 @@
 {
     using System;
     using System.IO;
+    using System.Runtime.InteropServices;
     using System.Text;
-    using System.Xml.Serialization;
 
     internal sealed class EventSourceManifest
     {
         private readonly StringBuilder chunkBuilder = new StringBuilder();
 
-        private readonly Guid providerGuid;
+        private Guid providerGuid;
+
+        private IntPtr providerEventInfoPtr;
+
+        private IntPtr[] traceEventInfos;
 
         private readonly byte format;
 
@@ -23,8 +27,6 @@
 
         private ushort chunksReceived;
 
-        private instrumentationManifest manifest;
-
         public EventSourceManifest(Guid providerGuid, byte format, byte majorVersion, byte minorVersion, byte magic, ushort totalChunks)
         {
             this.providerGuid = providerGuid;
@@ -33,33 +35,30 @@
             this.minorVersion = minorVersion;
             this.magic = magic;
             this.totalChunks = totalChunks;
+            this.providerEventInfoPtr = IntPtr.Zero;
+        }
+
+        ~EventSourceManifest()
+        {
+            if (this.providerEventInfoPtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(this.providerEventInfoPtr);
+            }
+
+            if (this.traceEventInfos != null)
+            {
+                for (int i = 0; i < this.traceEventInfos.Length; ++i)
+                {
+                    var traceEventInfo = this.traceEventInfos[i];
+                    if (traceEventInfo != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(traceEventInfo);
+                    }
+                }
+            }
         }
 
         public bool IsComplete => this.chunksReceived == this.totalChunks;
-
-        public instrumentationManifest Schema
-        {
-            get
-            {
-                if (this.chunksReceived != this.totalChunks)
-                {
-                    throw new Exception("Schema is incomplete as not all chunks have been received");
-                }
-
-                if (this.manifest == null)
-                {
-                    string value = this.chunkBuilder.ToString();
-                    var bytes = Encoding.ASCII.GetBytes(value);
-                    using (var ms = new MemoryStream(bytes))
-                    {
-                        XmlSerializer serializer = new XmlSerializer(typeof(instrumentationManifest));
-                        this.manifest = (instrumentationManifest)serializer.Deserialize(ms);
-                    }
-                }
-
-                return this.manifest;
-            }
-        }
 
         public Guid ProviderGuid => this.providerGuid;
 
@@ -72,6 +71,113 @@
         public byte Magic => this.magic;
 
         public ushort TotalChunks => this.totalChunks;
+
+        public bool LoadSchema()
+        {
+            if (this.chunksReceived != this.totalChunks)
+            {
+                throw new Exception("Schema is incomplete as not all chunks have been received");
+            }
+
+            if (this.providerEventInfoPtr == IntPtr.Zero)
+            {
+                var tempPath = Path.GetTempFileName();
+                File.WriteAllText(tempPath, this.chunkBuilder.ToString());
+                int retVal = Tdh.LoadManifest(tempPath);
+
+                if (retVal != 0)
+                {
+                    if (retVal == 1465)
+                    {
+                        Console.WriteLine($"TdhLoadManifest failed for Provider Id: {this.ProviderGuid} with error code because of an XML parsing error. MC.exe can be used to diagnose the failure.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"TdhLoadManifest failed for Provider Id: {this.ProviderGuid} with error code ({retVal}).");
+                    }
+
+                    return false;
+                }
+
+                unsafe
+                {
+                    int bufferSize = 0;
+                    if ((retVal = Tdh.EnumerateManifestProviderEvents(ref this.providerGuid, IntPtr.Zero, out bufferSize)) == 122)
+                    {
+                        this.providerEventInfoPtr = Marshal.AllocHGlobal(bufferSize);
+                        if ((retVal = Tdh.EnumerateManifestProviderEvents(ref this.providerGuid, this.providerEventInfoPtr, out bufferSize)) == 0)
+                        {
+                            var providerEventInfo = (PROVIDER_EVENT_INFO*)this.providerEventInfoPtr;
+                            this.traceEventInfos = new IntPtr[providerEventInfo->NumberOfEvents];
+
+                            for (uint i = 0; i < providerEventInfo->NumberOfEvents; ++i)
+                            {
+                                bufferSize = 0;
+                                EVENT_DESCRIPTOR* descriptor = (EVENT_DESCRIPTOR*)((byte*)providerEventInfo + 8 + sizeof(EVENT_DESCRIPTOR) * i);
+
+                                if ((retVal = Tdh.GetManifestEventInformation(ref this.providerGuid, descriptor, IntPtr.Zero, out bufferSize)) == 122)
+                                {
+                                    IntPtr traceEventInfoPtr = Marshal.AllocHGlobal(bufferSize);
+                                    if ((retVal = Tdh.GetManifestEventInformation(ref this.providerGuid, descriptor, traceEventInfoPtr, out bufferSize)) == 0)
+                                    {
+                                        this.traceEventInfos[i] = traceEventInfoPtr;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"GetManifestEventInformation : {retVal}");
+                                        return false;
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"GetManifestEventInformation failed : {retVal}");
+                                    return false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"EnumerateManifestProviderEvents failed : {retVal}");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"EnumerateManifestProviderEvents failed : {retVal}");
+
+                        return false;
+                    }
+                }
+
+                retVal = Tdh.UnloadManifest(tempPath);
+
+                if (retVal != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public IEventTraceOperand GetTraceEventInfo(ushort eventId, byte version)
+        {
+            unsafe
+            {
+                var providerEventInfo = (PROVIDER_EVENT_INFO*)this.providerEventInfoPtr;
+                for (uint i = 0; i < providerEventInfo->NumberOfEvents; ++i)
+                {
+                    EVENT_DESCRIPTOR* descriptor = (EVENT_DESCRIPTOR*)((byte*)providerEventInfo + 8 + sizeof(EVENT_DESCRIPTOR) * i);
+
+                    if (descriptor->Id == eventId && descriptor->Version == version)
+                    {
+                        return EventTraceOperandBuilder.Build((TRACE_EVENT_INFO*)this.traceEventInfos[i]);
+                    }
+                }
+            }
+
+            return null;
+        }
 
         public void AddChunk(string schemaChunk)
         {

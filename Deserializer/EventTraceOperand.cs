@@ -4,14 +4,11 @@
 
     internal sealed class EventTraceOperand : IEventTraceOperand
     {
-        internal EventTraceOperand(EventMetadata metadata, int eventMetadataTableIndex, IEnumerable<IEventTracePropertyOperand> operands)
+        internal EventTraceOperand(EventMetadata metadata, IEnumerable<IEventTracePropertyOperand> operands)
         {
             this.Metadata = metadata;
-            this.EventMetadataTableIndex = eventMetadataTableIndex;
             this.EventPropertyOperands = operands;
         }
-
-        public int EventMetadataTableIndex { get; }
 
         public EventMetadata Metadata { get; }
 

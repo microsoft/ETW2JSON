@@ -4,7 +4,7 @@
 
     public interface IEtwWriter
     {
-        void WriteEventBegin(EventMetadata metadata, RuntimeEventMetadata runtimeMetadata);
+        void WriteEventBegin(string eventName, EventRecordReader runtimeMetadata);
 
         void WriteEventEnd();
 

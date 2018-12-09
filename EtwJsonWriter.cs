@@ -15,7 +15,7 @@
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public void WriteEventBegin(EventMetadata metadata, RuntimeEventMetadata runtimeMetadata)
+        public void WriteEventBegin(string eventName, EventRecordReader runtimeMetadata)
         {
             this.writer.WriteStartObject();
             this.writer.WritePropertyName("Event");
@@ -25,13 +25,13 @@
             this.writer.WriteValue(runtimeMetadata.Timestamp);
 
             this.writer.WritePropertyName("ProviderGuid");
-            this.writer.WriteValue(metadata.ProviderGuid);
+            this.writer.WriteValue(runtimeMetadata.ProviderId);
 
             this.writer.WritePropertyName("Id");
-            this.writer.WriteValue(metadata.Id);
+            this.writer.WriteValue(runtimeMetadata.EventId);
 
             this.writer.WritePropertyName("Version");
-            this.writer.WriteValue(metadata.Version);
+            this.writer.WriteValue(runtimeMetadata.Version);
 
             this.writer.WritePropertyName("ProcessId");
             this.writer.WriteValue(runtimeMetadata.ProcessId);
@@ -56,8 +56,7 @@
                 this.writer.WriteValue(relatedActivityId);
             }
 
-            ulong matchId;
-            var stacks = runtimeMetadata.GetStacks(out matchId);
+            var stacks = runtimeMetadata.GetStacks(out var matchId);
             if (matchId != 0)
             {
                 this.writer.WritePropertyName("StackMatchId");
@@ -76,7 +75,7 @@
             }
             
             this.writer.WritePropertyName("Name");
-            this.writer.WriteValue(metadata.Name);
+            this.writer.WriteValue(eventName);
             
             this.writer.WritePropertyName("Properties");
             this.writer.WriteStartArray();
