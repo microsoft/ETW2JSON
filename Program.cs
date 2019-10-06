@@ -6,14 +6,14 @@
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
+    using System.Text.Json;
     using ETWDeserializer;
-    using Newtonsoft.Json;
     
     public static class Program
     {
         private static string Usage = "Usage: ETW2JSON filename.etl [filename2.etl] -output=filename.json";
 
-        public static bool ConvertToJson(JsonWriter jsonWriter, IEnumerable<string> inputFiles, Action<string> reportError)
+        public static bool ConvertToJson(Utf8JsonWriter jsonWriter, IEnumerable<string> inputFiles, Action<string> reportError)
         {
             var list = inputFiles.ToList();
             var deserializer = new Deserializer<EtwJsonWriter>(new EtwJsonWriter(jsonWriter));
@@ -99,31 +99,29 @@
                 return;
             }
 
-            var streamWriter = new StreamWriter(commandLineInfo.Output);
-            var jsonWriter = new JsonTextWriter(streamWriter);
-
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            
-            foreach (var file in commandLineInfo.Inputs)
+            using (var stream = new FileStream(commandLineInfo.Output, FileMode.Create, FileAccess.Write))
             {
-                Console.WriteLine("Input: " + file);
-            }
+                var jsonWriter = new Utf8JsonWriter(stream);
 
-            Console.WriteLine("Output: " + commandLineInfo.Output);
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
 
-            bool success = ConvertToJson(jsonWriter, commandLineInfo.Inputs, Console.WriteLine);
-            
-            jsonWriter.Close();
-            streamWriter.Close();
+                foreach (var file in commandLineInfo.Inputs)
+                {
+                    Console.WriteLine("Input: " + file);
+                }
 
-            if (!success)
-            {
-                Console.WriteLine("Error encountered.");
-            }
-            else
-            {
-                Console.WriteLine("Finished processing in " + watch.ElapsedMilliseconds + " milliseconds");
+                Console.WriteLine("Output: " + commandLineInfo.Output);
+
+                bool success = ConvertToJson(jsonWriter, commandLineInfo.Inputs, Console.WriteLine);
+                if (!success)
+                {
+                    Console.WriteLine("Error encountered.");
+                }
+                else
+                {
+                    Console.WriteLine("Finished processing in " + watch.ElapsedMilliseconds + " milliseconds");
+                }
             }
         }
 

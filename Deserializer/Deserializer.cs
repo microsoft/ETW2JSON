@@ -3,8 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
-    using System.Reflection;
-    using System.Reflection.Emit;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Text.RegularExpressions;
@@ -252,15 +250,7 @@
                 var name = Regex.Replace(InvalidCharacters.Replace(operand.Metadata.Name, "_"), @"\s+", "_");
                 var body = EventTraceOperandExpressionBuilder.Build(operand, eventRecordReaderParam, eventWriterParam, eventMetadataTableParam, runtimeMetadataParam);
                 LambdaExpression expression = Expression.Lambda<Action<EventRecordReader, T, EventMetadata[], RuntimeEventMetadata>>(body, "Read_" + name, parameters);
-
-                var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), AssemblyBuilderAccess.RunAndCollect);
-                var moduleBuilder = assemblyBuilder.DefineDynamicModule(name, name + ".dll");
-
-                var typeBuilder = moduleBuilder.DefineType(name, TypeAttributes.Public);
-                var methodBuilder = typeBuilder.DefineMethod("Read", MethodAttributes.Public | MethodAttributes.Static, typeof(void), new[] { ReaderType, WriterType, EventMetadataArrayType, RuntimeMetadataType });
-
-                expression.CompileToMethod(methodBuilder);
-                var action = (Action<EventRecordReader, T, EventMetadata[], RuntimeEventMetadata>)Delegate.CreateDelegate(expression.Type, typeBuilder.CreateType().GetMethod("Read"));
+                var action = (Action<EventRecordReader, T, EventMetadata[], RuntimeEventMetadata>)expression.Compile(false);
 
                 if (isSpecialKernelTraceMetaDataEvent)
                 {

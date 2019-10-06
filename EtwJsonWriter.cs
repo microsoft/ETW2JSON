@@ -2,14 +2,14 @@
 {
     using System;
     using System.Runtime.CompilerServices;
+    using System.Text.Json;
     using ETWDeserializer;
-    using Newtonsoft.Json;
 
     public struct EtwJsonWriter : IEtwWriter
     {
-        private readonly JsonWriter writer;
+        private readonly Utf8JsonWriter writer;
 
-        public EtwJsonWriter(JsonWriter writer)
+        public EtwJsonWriter(Utf8JsonWriter writer)
         {
             this.writer = writer;
         }
@@ -22,46 +22,45 @@
             this.writer.WriteStartObject();
 
             this.writer.WritePropertyName("Timestamp");
-            this.writer.WriteValue(runtimeMetadata.Timestamp);
+            this.writer.WriteNumberValue(runtimeMetadata.Timestamp);
 
             this.writer.WritePropertyName("ProviderGuid");
-            this.writer.WriteValue(metadata.ProviderGuid);
+            this.writer.WriteStringValue(metadata.ProviderGuid.ToString("D"));
 
             this.writer.WritePropertyName("Id");
-            this.writer.WriteValue(metadata.Id);
+            this.writer.WriteNumberValue(metadata.Id);
 
             this.writer.WritePropertyName("Version");
-            this.writer.WriteValue(metadata.Version);
+            this.writer.WriteNumberValue(metadata.Version);
 
             this.writer.WritePropertyName("ProcessId");
-            this.writer.WriteValue(runtimeMetadata.ProcessId);
+            this.writer.WriteNumberValue(runtimeMetadata.ProcessId);
 
             this.writer.WritePropertyName("ThreadId");
-            this.writer.WriteValue(runtimeMetadata.ThreadId);
+            this.writer.WriteNumberValue(runtimeMetadata.ThreadId);
 
             this.writer.WritePropertyName("ProcessorNumber");
-            this.writer.WriteValue(runtimeMetadata.ProcessorNumber);
+            this.writer.WriteNumberValue(runtimeMetadata.ProcessorNumber);
 
             var activityId = runtimeMetadata.ActivityId;
             if (activityId != Guid.Empty)
             {
                 this.writer.WritePropertyName("ActivityId");
-                this.writer.WriteValue(activityId);
+                this.writer.WriteStringValue(activityId.ToString("D"));
             }
 
             var relatedActivityId = runtimeMetadata.RelatedActivityId;
             if (relatedActivityId != Guid.Empty)
             {
                 this.writer.WritePropertyName("RelatedActivityId");
-                this.writer.WriteValue(relatedActivityId);
+                this.writer.WriteStringValue(relatedActivityId.ToString("D"));
             }
 
-            ulong matchId;
-            var stacks = runtimeMetadata.GetStacks(out matchId);
+            var stacks = runtimeMetadata.GetStacks(out var matchId);
             if (matchId != 0)
             {
                 this.writer.WritePropertyName("StackMatchId");
-                this.writer.WriteValue(matchId);
+                this.writer.WriteNumberValue(matchId);
             }
 
             if (stacks != null)
@@ -70,13 +69,13 @@
                 this.writer.WriteStartArray();
                 for (int i = 0; i < stacks.Length; ++i)
                 {
-                    this.writer.WriteValue(stacks[i]);
+                    this.writer.WriteNumberValue(stacks[i]);
                 }
                 this.writer.WriteEndArray();
             }
             
             this.writer.WritePropertyName("Name");
-            this.writer.WriteValue(metadata.Name);
+            this.writer.WriteStringValue(metadata.Name);
             
             this.writer.WritePropertyName("Properties");
             this.writer.WriteStartArray();
@@ -130,139 +129,139 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteAnsiString(string value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteStringValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUnicodeString(string value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteStringValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt8(sbyte value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt8(byte value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt16(short value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt16(ushort value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt32(int value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt32(uint value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteInt64(long value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUInt64(ulong value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteFloat(float value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteDouble(double value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBoolean(bool value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteBooleanValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteBinary(byte[] value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteBase64StringValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteGuid(Guid value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteStringValue(value.ToString("D"));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WritePointer(ulong value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteFileTime(DateTime value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteStringValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteSystemTime(DateTime value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteStringValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteSid(string value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteStringValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteUnicodeChar(char value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteAnsiChar(char value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteNumberValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteHexDump(byte[] value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteBase64StringValue(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteWbemSid(string value)
         {
-            this.writer.WriteValue(value);
+            this.writer.WriteStringValue(value);
         }
     }
 }
