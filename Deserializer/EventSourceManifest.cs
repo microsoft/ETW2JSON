@@ -52,7 +52,7 @@
                     var bytes = Encoding.ASCII.GetBytes(value);
                     using (var ms = new MemoryStream(bytes))
                     {
-                        XmlSerializer serializer = new XmlSerializer(typeof(instrumentationManifest));
+                        var serializer = new Microsoft.Xml.Serialization.GeneratedAssembly.instrumentationManifestSerializer();
                         this.manifest = (instrumentationManifest)serializer.Deserialize(ms);
                     }
                 }
