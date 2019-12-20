@@ -11,7 +11,7 @@
     
     public static class Program
     {
-        private static string Usage = "Usage: ETW2JSON filename.etl [filename2.etl] -output=filename.json";
+        private static readonly string Usage = "Usage: ETW2JSON filename.etl [filename2.etl] -output=filename.json";
 
         public static bool ConvertToJson(Utf8JsonWriter jsonWriter, IEnumerable<string> inputFiles, Action<string> reportError)
         {
@@ -99,29 +99,27 @@
                 return;
             }
 
-            using (var stream = new FileStream(commandLineInfo.Output, FileMode.Create, FileAccess.Write))
+            using var stream = new FileStream(commandLineInfo.Output, FileMode.Create, FileAccess.Write);
+            var jsonWriter = new Utf8JsonWriter(stream);
+
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+
+            foreach (var file in commandLineInfo.Inputs)
             {
-                var jsonWriter = new Utf8JsonWriter(stream);
+                Console.WriteLine("Input: " + file);
+            }
 
-                Stopwatch watch = new Stopwatch();
-                watch.Start();
+            Console.WriteLine("Output: " + commandLineInfo.Output);
 
-                foreach (var file in commandLineInfo.Inputs)
-                {
-                    Console.WriteLine("Input: " + file);
-                }
-
-                Console.WriteLine("Output: " + commandLineInfo.Output);
-
-                bool success = ConvertToJson(jsonWriter, commandLineInfo.Inputs, Console.WriteLine);
-                if (!success)
-                {
-                    Console.WriteLine("Error encountered.");
-                }
-                else
-                {
-                    Console.WriteLine("Finished processing in " + watch.ElapsedMilliseconds + " milliseconds");
-                }
+            bool success = ConvertToJson(jsonWriter, commandLineInfo.Inputs, Console.WriteLine);
+            if (!success)
+            {
+                Console.WriteLine("Error encountered.");
+            }
+            else
+            {
+                Console.WriteLine("Finished processing in " + watch.ElapsedMilliseconds + " milliseconds");
             }
         }
 
