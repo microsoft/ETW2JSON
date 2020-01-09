@@ -82,6 +82,7 @@
                 Etw.CloseTrace(handles[i]);
             }
 
+            jsonWriter.Flush();
             return true;
         }
 
